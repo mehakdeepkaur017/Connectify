@@ -661,7 +661,7 @@ export const getUserPosts = async (req: Request, res: Response, next: NextFuncti
       }
     }
 
-    const posts = await (Post.find({ author: req.params.id }) as any)
+    const posts = await (Post.find({ author: req.params.id, isArchived: { $ne: true } }) as any)
       .populate('author', 'username fullName avatar')
       .populate({ path: 'taggedUsers', select: 'username fullName avatar' })
       .populate({ path: 'mentions.user', select: 'username fullName avatar' })
@@ -708,7 +708,7 @@ export const getUserTaggedPosts = async (req: Request, res: Response, next: Next
       }
     }
 
-    const posts = await (Post.find({ taggedUsers: req.params.id as any }) as any)
+    const posts = await (Post.find({ taggedUsers: req.params.id as any, isArchived: { $ne: true } }) as any)
       .populate('author', 'username fullName avatar')
       .populate({ path: 'taggedUsers', select: 'username fullName avatar' })
       .populate({ path: 'mentions.user', select: 'username fullName avatar' })
