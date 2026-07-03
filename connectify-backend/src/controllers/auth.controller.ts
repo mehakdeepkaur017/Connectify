@@ -17,7 +17,7 @@ const setTokenCookie = (res: Response, token: string) => {
   res.cookie('refreshToken', token, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'lax',
+    sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-domain cookies in production
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
@@ -75,7 +75,7 @@ export const logoutController = async (req: Request, res: Response, next: NextFu
     res.cookie('refreshToken', 'logout', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       expires: new Date(Date.now() + 10 * 1000), // expire in 10 seconds
     });
 
