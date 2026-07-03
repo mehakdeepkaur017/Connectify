@@ -82,15 +82,8 @@ export function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps = {}) 
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div>
           <Label htmlFor="password">Password</Label>
-          <Link
-            href="/forgot-password"
-            className="text-sm font-medium text-primary hover:underline"
-            tabIndex={-1}
-          >
-            Forgot password?
-          </Link>
         </div>
         <PasswordInput
           id="password"
