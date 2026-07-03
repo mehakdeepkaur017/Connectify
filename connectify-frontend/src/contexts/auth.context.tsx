@@ -77,30 +77,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUser = React.useCallback(async () => {
     try {
       // First check if we have a saved token in localStorage to restore the session
-      // Wait, we don't store the current token separately, but we can get it from the first session or active session.
       const storedAccessToken = localStorage.getItem('connectify_access_token');
-      if (storedAccessToken) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${storedAccessToken}`;
+      if (!storedAccessToken) {
+        // No token stored, no need to call the API — user is not logged in
+        setUser(null);
+        setIsLoading(false);
+        return;
       }
 
-      const response = await api.get('/auth/me');
-      if (response.data.success) {
-        const fetchedUser = response.data.data.user;
-        setUser(fetchedUser);
+      api.defaults.headers.common['Authorization'] = `Bearer ${storedAccessToken}`;
+
+      // Add a timeout so the app doesn't hang forever if the backend is slow (e.g., Render free tier cold start)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+      try {
+        const response = await api.get('/auth/me', { signal: controller.signal });
+        clearTimeout(timeoutId);
         
-        // Re-read tokens from localStorage — the interceptor may have refreshed them
-        const currentAccessToken = localStorage.getItem('connectify_access_token');
-        const currentRefreshToken = localStorage.getItem('connectify_refresh_token') || '';
-        if (currentAccessToken) {
-          const sessions = loadSessions();
-          const existingIndex = sessions.findIndex(s => s.user.username === fetchedUser.username);
-          if (existingIndex >= 0) {
-            sessions[existingIndex] = { accessToken: currentAccessToken, refreshToken: currentRefreshToken, user: fetchedUser };
-          } else {
-            sessions.push({ accessToken: currentAccessToken, refreshToken: currentRefreshToken, user: fetchedUser });
+        if (response.data.success) {
+          const fetchedUser = response.data.data.user;
+          setUser(fetchedUser);
+          
+          // Re-read tokens from localStorage — the interceptor may have refreshed them
+          const currentAccessToken = localStorage.getItem('connectify_access_token');
+          const currentRefreshToken = localStorage.getItem('connectify_refresh_token') || '';
+          if (currentAccessToken) {
+            const sessions = loadSessions();
+            const existingIndex = sessions.findIndex(s => s.user.username === fetchedUser.username);
+            if (existingIndex >= 0) {
+              sessions[existingIndex] = { accessToken: currentAccessToken, refreshToken: currentRefreshToken, user: fetchedUser };
+            } else {
+              sessions.push({ accessToken: currentAccessToken, refreshToken: currentRefreshToken, user: fetchedUser });
+            }
+            saveSessions(sessions);
           }
-          saveSessions(sessions);
         }
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        // If it was a timeout/abort, just treat as not logged in
+        if (err?.name === 'AbortError' || err?.name === 'CanceledError') {
+          console.warn('Auth check timed out — backend may be waking up');
+        }
+        throw err;
       }
     } catch {
       setUser(null);
