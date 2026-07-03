@@ -81,9 +81,7 @@ export const getConversationMessages = async (conversationId: string, page = 1, 
 };
 
 export const sendMessage = async (conversationId: string, formData: FormData): Promise<Message> => {
-  const { data } = await api.post(`/messages/conversations/${conversationId}/messages`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const { data } = await api.post(`/messages/conversations/${conversationId}/messages`, formData);
   return data.data;
 };
 

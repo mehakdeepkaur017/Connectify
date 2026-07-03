@@ -89,11 +89,7 @@ export const getSuggestedFeed = async ({ pageParam = 1 }: { pageParam?: number }
 };
 
 export const createPost = async (formData: FormData) => {
-  const { data } = await api.post('/posts', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const { data } = await api.post('/posts', formData);
   return data;
 };
 
