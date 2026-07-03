@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth.context';
 import { getImageUrl, cn } from '@/lib/utils';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { getUserFollowing, getUserFollowers } from '@/lib/api/users.api';
+import { getUserFollowing, getUserFollowers, searchUsers } from '@/lib/api/users.api';
 import { createConversation, sendMessage } from '@/lib/api/messages.api';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '../ui/loading-spinner';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface SharePostModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ interface SharePostModalProps {
 export function SharePostModal({ isOpen, onClose, postId, profileId, storyId }: SharePostModalProps) {
   const { user } = useAuth();
   const [query, setQuery] = React.useState('');
+  const debouncedQuery = useDebounce(query, 300);
   const [selectedUsers, setSelectedUsers] = React.useState<string[]>([]);
   const [isSending, setIsSending] = React.useState(false);
 
@@ -38,17 +40,25 @@ export function SharePostModal({ isOpen, onClose, postId, profileId, storyId }: 
     enabled: isOpen && !!user,
   });
 
+  const { data: globalSearchResults, isLoading: loadingSearch } = useQuery({
+    queryKey: ['searchUsers', debouncedQuery],
+    queryFn: () => searchUsers(debouncedQuery),
+    enabled: isOpen && debouncedQuery.length > 0,
+  });
+
+  const globalUsers = globalSearchResults?.users || [];
+
   // Combine and deduplicate
   const contacts = React.useMemo(() => {
-    if (!following && !followers) return [];
+    if (!following && !followers && globalUsers.length === 0) return [];
     const map = new Map();
-    [...(following || []), ...(followers || [])].forEach((u) => {
+    [...(following || []), ...(followers || []), ...globalUsers].forEach((u) => {
       if (!map.has(u._id)) {
         map.set(u._id, u);
       }
     });
     return Array.from(map.values());
-  }, [following, followers]);
+  }, [following, followers, globalUsers]);
 
   const filteredContacts = contacts.filter((c) =>
     c.username?.toLowerCase().includes(query.toLowerCase()) ||
@@ -122,7 +132,7 @@ export function SharePostModal({ isOpen, onClose, postId, profileId, storyId }: 
         </div>
 
         <div className="flex-1 overflow-y-auto max-h-[300px] min-h-[300px] p-2">
-          {loadingFollowing || loadingFollowers ? (
+          {loadingFollowing || loadingFollowers || loadingSearch ? (
             <div className="flex justify-center py-10"><LoadingSpinner /></div>
           ) : filteredContacts.length === 0 ? (
             <div className="text-center text-muted-foreground py-10 text-sm">No users found</div>
