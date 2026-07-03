@@ -10,6 +10,7 @@ import {
 } from '../validations/auth.validation';
 import * as authService from '../services/auth.service';
 import { env } from '../config/env';
+import { generateAccessToken, generateRefreshToken } from '../utils/auth';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -26,12 +27,15 @@ export const signupController = async (req: Request, res: Response, next: NextFu
   try {
     const validatedData = signupSchema.parse(req.body);
     const user = await authService.registerUser(validatedData);
-    const { user: loggedInUser, accessToken, refreshToken } = await authService.loginUser({ email: validatedData.email, password: validatedData.password });
+    
+    // Generate tokens directly to avoid redundant bcrypt password comparison which is slow on free tier
+    const accessToken = generateAccessToken(user._id.toString());
+    const refreshToken = generateRefreshToken(user._id.toString());
     
     setTokenCookie(res, refreshToken);
 
     res.status(201).json(
-      new ApiResponse(true, 'User registered and logged in successfully.', { user: loggedInUser, accessToken, refreshToken })
+      new ApiResponse(true, 'User registered and logged in successfully.', { user, accessToken, refreshToken })
     );
   } catch (error: any) {
     if (error.name === 'ZodError') {
