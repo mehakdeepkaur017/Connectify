@@ -86,7 +86,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps = {})
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push('/');
+        router.push('/home');
       }
     },
     onError: (error: Error) => {

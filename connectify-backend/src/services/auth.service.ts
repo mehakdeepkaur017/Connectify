@@ -16,26 +16,12 @@ export const registerUser = async (data: any) => {
   }
 
   const hashedPassword = await hashPassword(password);
-  
-  // Generate Verification Token
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-  const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
 
   const newUser = await User.create({
     fullName,
     username,
     email,
     password: hashedPassword,
-    emailVerificationToken: hashedVerificationToken,
-  });
-
-  // Send Verification Email
-  const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
-  await sendEmail({
-    to: newUser.email,
-    subject: 'Welcome to Connectify - Verify your email',
-    text: `Please verify your email by clicking the following link: ${verifyUrl}`,
-    html: `<p>Please verify your email by clicking the following link:</p><a href="${verifyUrl}">${verifyUrl}</a>`,
   });
 
   const userObj = newUser.toObject();
