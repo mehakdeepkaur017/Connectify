@@ -5,9 +5,6 @@ const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1
 export const api = axios.create({
   baseURL,
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 let isRefreshing = false;
