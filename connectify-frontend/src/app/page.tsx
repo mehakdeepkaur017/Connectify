@@ -71,21 +71,6 @@ export default function LandingPage() {
           </motion.div>
         </section>
 
-        {/* Phone Mockup Section */}
-        <section className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto -mt-10 mb-32 z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="mx-auto max-w-5xl"
-          >
-            <div className="relative rounded-[2.5rem] border-4 border-foreground/10 bg-background/50 backdrop-blur-3xl shadow-2xl overflow-hidden aspect-[16/9] flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-violet-500/10" />
-              <p className="text-2xl font-medium text-muted-foreground/50">App Preview Interface</p>
-            </div>
-          </motion.div>
-        </section>
 
         {/* Features Section */}
         <section id="features" className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-24">
