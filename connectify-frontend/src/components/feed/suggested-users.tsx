@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSuggestedUsers, followUser } from '@/lib/api/users.api';
+import { getSuggestedUsers } from '@/lib/api/users.api';
+import { useFollowMutation } from '@/hooks/use-profile';
 import { getImageUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -15,16 +16,7 @@ export function SuggestedUsers() {
     queryFn: getSuggestedUsers,
   });
 
-  const followMutation = useMutation({
-    mutationFn: followUser,
-    onSuccess: () => {
-      // Invalidate to refresh feed and hide suggested if following > 0
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
-      queryClient.invalidateQueries({ queryKey: ['suggestedUsers'] });
-      queryClient.invalidateQueries({ queryKey: ['me'] });
-      queryClient.invalidateQueries({ queryKey: ['stories'] });
-    }
-  });
+  const followMutation = useFollowMutation();
 
   if (isLoading || !suggestedUsers || suggestedUsers.length === 0) {
     return null;

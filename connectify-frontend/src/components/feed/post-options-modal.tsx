@@ -4,7 +4,8 @@ import { Post, updatePost, archivePost, deletePost } from '@/lib/api/posts.api';
 import { useAuth } from '@/contexts/auth.context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { followUser, unfollowUser, blockUser, muteUser, restrictUser } from '@/lib/api/users.api';
+import { blockUser, muteUser, restrictUser } from '@/lib/api/users.api';
+import { useFollowMutation, useUnfollowMutation } from '@/hooks/use-profile';
 
 interface PostOptionsModalProps {
   post: Post;
@@ -62,14 +63,8 @@ export function PostOptionsModal({ post, isOpen, onClose, onEdit, onShare }: Pos
   const isFollowing = user?.following?.includes(post.author._id);
   const isMuted = user?.mutedUsers?.includes(post.author._id);
 
-  const followMutation = useMutation({
-    mutationFn: () => isFollowing ? unfollowUser(post.author._id) : followUser(post.author._id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
-      toast.success(isFollowing ? 'User unfollowed' : 'User followed');
-      onClose();
-    }
-  });
+  const followMutation = useFollowMutation();
+  const unfollowMutation = useUnfollowMutation();
 
   const blockMutation = useMutation({
     mutationFn: () => blockUser(post.author._id),
@@ -163,7 +158,13 @@ export function PostOptionsModal({ post, isOpen, onClose, onEdit, onShare }: Pos
               <button onClick={() => handleAction(() => restrictMutation.mutate())} className={`${menuButtonClass} text-red-500 font-bold`}>
                 Restrict
               </button>
-              <button onClick={() => handleAction(() => followMutation.mutate())} className={`${menuButtonClass} ${isFollowing ? 'text-red-500 font-bold' : 'text-blue-500 font-bold'}`}>
+              <button onClick={() => {
+                if (isFollowing) {
+                  handleAction(() => unfollowMutation.mutate(post.author._id, { onSuccess: () => onClose() }));
+                } else {
+                  handleAction(() => followMutation.mutate(post.author._id, { onSuccess: () => onClose() }));
+                }
+              }} className={`${menuButtonClass} ${isFollowing ? 'text-red-500 font-bold' : 'text-blue-500 font-bold'}`}>
                 {isFollowing ? 'Unfollow' : 'Follow'}
               </button>
               <button onClick={() => handleAction(() => muteMutation.mutate())} className={menuButtonClass}>

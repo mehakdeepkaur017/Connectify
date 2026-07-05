@@ -15,6 +15,7 @@ import {
   removeFollower
 } from '@/lib/api/users.api';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/auth.context';
 
 export const useSearchUsers = (query: string) => {
   return useQuery({
@@ -105,6 +106,7 @@ export const useUpdateProfile = (onSuccessCallback?: (data: unknown) => void) =>
 
 export const useFollowMutation = () => {
   const queryClient = useQueryClient();
+  const { user, updateUser } = useAuth();
   return useMutation({
     mutationFn: (userId: string) => followUser(userId),
     onSuccess: (response, userId) => {
@@ -112,7 +114,19 @@ export const useFollowMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['followers', userId] });
       queryClient.invalidateQueries({ queryKey: ['following'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+      queryClient.invalidateQueries({ queryKey: ['suggestedUsers'] });
       const status = response?.data?.status;
+      
+      // Update global context so UI updates instantly
+      if (user && status !== 'requested') {
+        const currentFollowing = user.following || [];
+        if (!currentFollowing.includes(userId)) {
+          updateUser({ following: [...currentFollowing, userId] });
+        }
+      }
+
       if (status === 'requested') {
         toast.success('Follow request sent');
       } else if (status === 'follow') {
@@ -130,6 +144,7 @@ export const useFollowMutation = () => {
 
 export const useUnfollowMutation = () => {
   const queryClient = useQueryClient();
+  const { user, updateUser } = useAuth();
   return useMutation({
     mutationFn: (userId: string) => unfollowUser(userId),
     onSuccess: (response, userId) => {
@@ -137,6 +152,15 @@ export const useUnfollowMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['followers', userId] });
       queryClient.invalidateQueries({ queryKey: ['following'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+      queryClient.invalidateQueries({ queryKey: ['suggestedUsers'] });
+      
+      // Update global context so UI updates instantly
+      if (user) {
+        updateUser({ following: (user.following || []).filter(id => id !== userId) });
+      }
+
       const status = response?.data?.status;
       if (status === 'follow') {
         toast.success('Follow request cancelled');
