@@ -47,11 +47,11 @@ export function ExploreGrid() {
     return <div className="text-center py-10 text-red-500">Error loading explore feed.</div>;
   }
 
-  const allPosts = data.pages.flatMap(page => page.posts);
+  const allPosts = data?.pages?.flatMap(page => page.posts) || [];
 
   // Backend now handles the query natively, so we don't need client-side filtering unless desired
   const filteredPosts = allPosts;
-  const selectedPost = React.useMemo(() => allPosts.find(p => p._id === selectedPostId) || null, [allPosts, selectedPostId]);
+  const selectedPost = allPosts.find(p => p._id === selectedPostId) || null;
 
   return (
     <>
