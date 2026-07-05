@@ -55,7 +55,7 @@ export function useLikeMutation(post: Post) {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['post'] });
-      queryClient.invalidateQueries({ queryKey: ['explore'] });
+      queryClient.invalidateQueries({ queryKey: ['exploreFeed'] });
       queryClient.invalidateQueries({ queryKey: ['saved'] });
     },
   });

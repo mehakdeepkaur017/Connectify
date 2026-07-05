@@ -49,6 +49,8 @@ export function SaveButton({ post }: SaveButtonProps) {
       queryClient.setQueryData(['feed'], context?.previousFeed);
     },
     onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['exploreFeed'] });
       queryClient.invalidateQueries({ queryKey: ['posts', 'saved'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       if (!post.isSaved) { // it was just saved (previous state was unsaved)

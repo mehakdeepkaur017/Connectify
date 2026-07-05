@@ -88,7 +88,7 @@ export function InstagramDesktopPostViewer({ post, isOpen, onClose }: InstagramD
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['post'] });
-      queryClient.invalidateQueries({ queryKey: ['explore'] });
+      queryClient.invalidateQueries({ queryKey: ['exploreFeed'] });
       queryClient.invalidateQueries({ queryKey: ['saved'] });
     }
   });
@@ -250,7 +250,10 @@ export function InstagramDesktopPostViewer({ post, isOpen, onClose }: InstagramD
                           <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2"></path>
                         </svg>
                       </button>
-                      <button className="text-foreground hover:text-muted-foreground transition-colors p-2 -ml-2 rounded-full hover:bg-muted/50">
+                      <button 
+                        onClick={() => setIsShareOpen(true)}
+                        className="text-foreground hover:text-muted-foreground transition-colors p-2 -ml-2 rounded-full hover:bg-muted/50"
+                      >
                         <svg aria-label="Share Post" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24">
                           <line fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" x1="22" x2="9.218" y1="3" y2="10.083"></line>
                           <polygon fill="none" points="11.698 20.334 22 3.001 2 3.001 9.218 10.084 11.698 20.334" stroke="currentColor" strokeLinejoin="round" strokeWidth="2"></polygon>
