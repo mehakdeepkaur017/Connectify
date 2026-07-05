@@ -12,7 +12,7 @@ export function ExploreGrid() {
   const searchParams = useSearchParams();
   const query = searchParams?.get('q') || '';
   const { ref, inView } = useInView();
-  const [selectedPost, setSelectedPost] = React.useState<Post | null>(null);
+  const [selectedPostId, setSelectedPostId] = React.useState<string | null>(null);
 
   const {
     data,
@@ -51,6 +51,7 @@ export function ExploreGrid() {
 
   // Backend now handles the query natively, so we don't need client-side filtering unless desired
   const filteredPosts = allPosts;
+  const selectedPost = React.useMemo(() => allPosts.find(p => p._id === selectedPostId) || null, [allPosts, selectedPostId]);
 
   return (
     <>
@@ -66,7 +67,7 @@ export function ExploreGrid() {
               isLarge ? "col-span-2 row-span-2" : "col-span-1 row-span-1",
               "aspect-square"
             )}
-            onClick={() => setSelectedPost(post)}
+            onClick={() => setSelectedPostId(post._id)}
           >
             <img 
               src={getImageUrl(post.images[0])} 
@@ -96,8 +97,8 @@ export function ExploreGrid() {
       {selectedPost && (
         <InstagramDesktopPostViewer
           post={selectedPost}
-          isOpen={true}
-          onClose={() => setSelectedPost(null)}
+          isOpen={!!selectedPostId}
+          onClose={() => setSelectedPostId(null)}
         />
       )}
     </>

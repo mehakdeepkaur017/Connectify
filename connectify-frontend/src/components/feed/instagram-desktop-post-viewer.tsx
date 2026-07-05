@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getComments, createComment, likePost, Comment as CommentType, Post } from '@/lib/api/posts.api';
 import { CommentItem } from './comment-item';
 import { PostOptionsModal } from './post-options-modal';
-import { ShareModal } from './share-modal';
+import { SharePostModal } from './share-post-modal';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useAuth } from '@/contexts/auth.context';
 import { ImageCarousel } from './image-carousel';
@@ -315,10 +315,10 @@ export function InstagramDesktopPostViewer({ post, isOpen, onClose }: InstagramD
                 />
 
                 {/* Share Modal */}
-                <ShareModal 
+                <SharePostModal 
                   isOpen={isShareOpen} 
                   onClose={() => setIsShareOpen(false)} 
-                  post={post} 
+                  postId={post._id} 
                 />
               </div>
             </motion.div>
@@ -340,11 +340,6 @@ export function InstagramDesktopPostViewer({ post, isOpen, onClose }: InstagramD
         }}
       />
 
-      <ShareModal
-        post={post}
-        isOpen={isShareOpen}
-        onClose={() => setIsShareOpen(false)}
-      />
     </>
   );
 }
